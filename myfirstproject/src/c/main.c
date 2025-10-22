@@ -38,7 +38,6 @@ static void popup_timer_cb(void *data) {
 }
 
 static void show_transient_popup(const char *message_ms) {
-  // remove existing popup if present
   if (s_popup_window) {
     if (s_popup_timer) {
       app_timer_cancel(s_popup_timer);
@@ -59,7 +58,7 @@ static void show_transient_popup(const char *message_ms) {
   Layer *root = window_get_root_layer(s_popup_window);
   GRect bounds = layer_get_bounds(root);
 
-  s_popup_text = text_layer_create(GRect(0, (bounds.size.h - 30) / 2, bounds.size.w, 30));
+  s_popup_text = text_layer_create(GRect(6, (bounds.size.h - 28) / 2, bounds.size.w - 12, 28));
   text_layer_set_text_alignment(s_popup_text, GTextAlignmentCenter);
   text_layer_set_text_color(s_popup_text, GColorWhite);
   text_layer_set_background_color(s_popup_text, GColorClear);
@@ -69,14 +68,16 @@ static void show_transient_popup(const char *message_ms) {
   layer_add_child(root, text_layer_get_layer(s_popup_text));
   window_stack_push(s_popup_window, true);
 
-  // 1000 ms = 1s
   s_popup_timer = app_timer_register(1000, popup_timer_cb, NULL);
 }
 
-// existing functions for menu / triggers...
 static void send_trigger(uint8_t webhook_index) {
   DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
+  AppMessageResult res = app_message_outbox_begin(&iter);
+  if (res != APP_MSG_OK || !iter) {
+    vibes_short_pulse();
+    return;
+  }
   dict_write_uint8(iter, KEY_TRIGGER, webhook_index);
   app_message_outbox_send();
   vibes_short_pulse();
@@ -98,7 +99,7 @@ static void build_menu_layer(Window *window) {
   s_display_count = 0;
   for (int i = 0; i < MAX_WEBHOOKS; i++) {
     if (!s_enabled[i]) continue;
-    snprintf(s_subtitles[i], sizeof(s_subtitles[i]), "Webhook %d auslösen", i + 1);
+    snprintf(s_subtitles[i], sizeof(s_subtitles[i]), "Webhook %d ausloesen", i + 1);
     s_menu_items[s_display_count] = (SimpleMenuItem){
       .title = s_titles[i],
       .subtitle = s_subtitles[i],
@@ -135,10 +136,24 @@ static void build_menu_layer(Window *window) {
   layer_add_child(window_get_root_layer(window), simple_menu_layer_get_layer(s_menu_layer));
 }
 
+static int32_t tuple_to_int32(const Tuple *t) {
+  if (!t) return 0;
+  switch (t->type) {
+    case TUPLE_CSTRING:
+      if (t->value && t->value->cstring) return atoi(t->value->cstring);
+      return 0;
+    case TUPLE_INT:
+      return t->value->int32;
+    case TUPLE_UINT:
+      return (int32_t)t->value->uint32;
+    default:
+      return 0;
+  }
+}
+
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   Tuple *t_update = dict_find(iter, KEY_UPDATE);
   if (t_update) {
-    // read names and enabled flags
     for (int i = 0; i < MAX_WEBHOOKS; i++) {
       Tuple *tname = dict_find(iter, KEY_NAME_BASE + i);
       if (tname && tname->value && tname->length > 0) {
@@ -148,37 +163,43 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
         snprintf(s_titles[i], sizeof(s_titles[i]), "Webhook %d", i + 1);
       }
       Tuple *ten = dict_find(iter, KEY_ENABLED_BASE + i);
-      if (ten) {
-        s_enabled[i] = ten->value->uint8 ? true : false;
-      } else {
-        s_enabled[i] = false;
-      }
+      s_enabled[i] = ten ? (ten->value->uint8 ? true : false) : false;
     }
     build_menu_layer(s_main_window);
     return;
   }
 
-  // status messages
   Tuple *tstatus = dict_find(iter, KEY_STATUS);
   if (tstatus) {
-    int status = (int)tstatus->value->int32;
-    static char buf[32];
-    if (status > 0) {
-      snprintf(buf, sizeof(buf), "Status %d", status);
-    } else if (status == 0) {
-      snprintf(buf, sizeof(buf), "Fehler");
-    } else if (status == -1) {
-      snprintf(buf, sizeof(buf), "Timeout");
-    } else {
-      snprintf(buf, sizeof(buf), "Status %d", status);
+    int32_t status = tuple_to_int32(tstatus);
+    static char buf[64];
+
+    switch (status) {
+      case 200:
+        snprintf(buf, sizeof(buf), "Erfolgreich");
+        break;
+      case 0:
+        snprintf(buf, sizeof(buf), "Fehler");
+        break;
+      case -1:
+        snprintf(buf, sizeof(buf), "Timeout");
+        break;
+      case -2:
+        snprintf(buf, sizeof(buf), "Webhook deaktiviert");
+        break;
+      default:
+        snprintf(buf, sizeof(buf), "Status %ld", (long)status);
+        break;
     }
+
     show_transient_popup(buf);
     return;
   }
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
-  // optional logging
+  (void)reason;
+  (void)context;
 }
 
 static void init_settings_defaults() {
@@ -202,15 +223,15 @@ static void main_window_unload(Window *window) {
 static void init(void) {
   init_settings_defaults();
 
-  // AppMessage
   app_message_register_inbox_received(inbox_received_callback);
   app_message_register_inbox_dropped(inbox_dropped_callback);
   app_message_open(1024, 1024);
 
   s_main_window = window_create();
   window_set_window_handlers(s_main_window, (WindowHandlers){
-                                           .load = main_window_load,
-                                           .unload = main_window_unload});
+    .load = main_window_load,
+    .unload = main_window_unload
+  });
   window_stack_push(s_main_window, true);
 }
 

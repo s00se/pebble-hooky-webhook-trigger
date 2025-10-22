@@ -3,8 +3,6 @@ var clayConfig = require('./clay-config.json');
 
 // --- Helpers: persistieren und Normalisieren
 function normalizeConfig(raw) {
-  // raw ist das decodeURIComponent(e.response) geparste Objekt oder persisted aus localStorage
-  // Wir erzeugen ein flaches Objekt: key -> primitive (string / boolean / number)
   var out = {};
   if (!raw || typeof raw !== 'object') return out;
   Object.keys(raw).forEach(function(k) {
@@ -47,7 +45,6 @@ clayConfigWithDefaults.forEach(function(section) {
     var key = item.messageKey;
     if (!key) return;
     if (typeof persisted[key] !== 'undefined') {
-      // Persisted is already flat primitive; set defaultValue accordingly
       item.defaultValue = persisted[key];
     }
   });
@@ -59,6 +56,7 @@ var KEY_TRIGGER = 0;
 var KEY_UPDATE = 1;
 var KEY_NAME_BASE = 10;
 var KEY_ENABLED_BASE = 20;
+var KEY_STATUS = 2; // neu: Status an Uhr senden
 
 // --- Utility
 function asString(v) {
@@ -111,7 +109,6 @@ Pebble.addEventListener('webviewclosed', function(e) {
   }
   try {
     var raw = JSON.parse(decodeURIComponent(e.response));
-    // raw enthält oft { key: { value: "..." } } oder flat values depending on Clay version
     var flat = normalizeConfig(raw);
     persistClaySettings(flat);
     persisted = flat;
@@ -126,7 +123,6 @@ Pebble.addEventListener('webviewclosed', function(e) {
 Pebble.addEventListener('ready', function () {
   console.log('Pebble ready');
   try {
-    // clay.getSettings() kann entweder flach oder verschachtelt liefern; normalize ebenfalls
     var s = {};
     try { s = clay.getSettings ? clay.getSettings() : {}; } catch (e) { s = {}; }
     var flatFromClay = normalizeConfig(s);
@@ -157,7 +153,9 @@ Pebble.addEventListener('appmessage', function (e) {
   var index = parseInt(trigger, 10);
   if (!index || index < 1 || index > 5) {
     console.log('Ungültiger Webhook-Index:', trigger);
-    Pebble.showSimpleNotificationOnPebble('Fehler', 'Ungültiger Webhook-Index!');
+    // Keine showSimpleNotificationOnPebble mehr, stattdessen optional Status senden
+    var errMsg = {}; errMsg[KEY_STATUS] = 0;
+    Pebble.sendAppMessage(errMsg, function(){}, function(){});
     return;
   }
 
@@ -165,7 +163,6 @@ Pebble.addEventListener('appmessage', function (e) {
 
   // Nutze die persistierte, normalisierte config (die ist flach primitives)
   var cfg = persisted || {};
-  // Versuche zusätzlich Clay-Live-Werte (normalize)
   try {
     var live = clay.getSettings ? normalizeConfig(clay.getSettings()) : {};
     if (Object.keys(live).length) cfg = Object.assign({}, cfg, live);
@@ -175,7 +172,8 @@ Pebble.addEventListener('appmessage', function (e) {
   var enabledKey = 'enabled' + index;
   if (!asBool(cfg[enabledKey])) {
     console.log('Webhook ' + index + ' ist deaktiviert, brich ab.');
-    Pebble.showSimpleNotificationOnPebble('Info', 'Webhook deaktiviert');
+    var infoMsg = {}; infoMsg[KEY_STATUS] = -2; // -2 = deaktiviert
+    Pebble.sendAppMessage(infoMsg, function(){}, function(){});
     return;
   }
 
@@ -190,7 +188,8 @@ Pebble.addEventListener('appmessage', function (e) {
 
   if (!WEBHOOK_URL) {
     console.log('Fehlende WEBHOOK_URL für Index', index);
-    Pebble.showSimpleNotificationOnPebble('Fehler', 'Webhook-URL fehlt!');
+    var missingMsg = {}; missingMsg[KEY_STATUS] = 0;
+    Pebble.sendAppMessage(missingMsg, function(){}, function(){});
     return;
   }
 
@@ -224,17 +223,22 @@ Pebble.addEventListener('appmessage', function (e) {
       } catch (err) {
         console.log('Antworttext konnte nicht gelesen werden:', err);
       }
-      Pebble.showSimpleNotificationOnPebble('Webhook', 'Status ' + xhr.status);
+      // Sende Status an Uhr statt showSimpleNotificationOnPebble
+      var statusMsg = {};
+      statusMsg[KEY_STATUS] = xhr.status;
+      Pebble.sendAppMessage(statusMsg, function(){ console.log('Status an Uhr gesendet:', xhr.status); }, function(e){ console.log('Fehler beim Senden status:', JSON.stringify(e)); });
     };
 
     xhr.onerror = function () {
       console.log('XHR Fehler:', xhr.status);
-      Pebble.showSimpleNotificationOnPebble('Fehler', 'Webhook fehlgeschlagen!');
+      var errMsg = {}; errMsg[KEY_STATUS] = 0; // 0 = Fehler
+      Pebble.sendAppMessage(errMsg, function(){}, function(){});
     };
 
     xhr.ontimeout = function () {
       console.log('XHR Timeout');
-      Pebble.showSimpleNotificationOnPebble('Fehler', 'Webhook Timeout!');
+      var toMsg = {}; toMsg[KEY_STATUS] = -1; // -1 = Timeout
+      Pebble.sendAppMessage(toMsg, function(){}, function(){});
     };
 
     xhr.onabort = function () {
@@ -244,6 +248,7 @@ Pebble.addEventListener('appmessage', function (e) {
     xhr.send();
   } catch (err) {
     console.log('Fehler beim Senden des XHR:', err);
-    Pebble.showSimpleNotificationOnPebble('Fehler', 'XHR Fehler');
+    var exMsg = {}; exMsg[KEY_STATUS] = 0;
+    Pebble.sendAppMessage(exMsg, function(){}, function(){});
   }
 });
