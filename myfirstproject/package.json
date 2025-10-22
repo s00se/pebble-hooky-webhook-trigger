@@ -1,6 +1,6 @@
 {
   "name": "webhooktrigger",
-  "author": "MakeAwesomeHappen",
+  "author": "Achi",
   "version": "1.0.0",
   "keywords": [
     "pebble-app"
@@ -10,7 +10,7 @@
     "pebble-clay": "^1.0.4"
   },
   "pebble": {
-    "displayName": "Webhook Trigger",
+    "displayName": "WH Trigger",
     "uuid": "00000000-0000-0000-0000-000000000001",
     "sdkVersion": "3",
     "enableMultiJS": true,
