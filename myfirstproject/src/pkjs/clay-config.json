@@ -1,0 +1,44 @@
+[
+  {
+    "type": "heading",
+    "defaultValue": "Webhook Trigger Einstellungen"
+  },
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "input",
+        "messageKey": "webhook",
+        "label": "Webhook URL",
+        "defaultValue": "https://example.com/webhook",
+        "attributes": {
+          "placeholder": "https://example.com/webhook",
+          "type": "url"
+        }
+      },
+      {
+        "type": "input",
+        "messageKey": "clientid",
+        "label": "Cloudflare Client ID (CF-Access-Client-Id)",
+        "defaultValue": "",
+        "attributes": {
+          "placeholder": "abc123.access"
+        }
+      },
+      {
+        "type": "input",
+        "messageKey": "clientsecret",
+        "label": "Cloudflare Client Secret (CF-Access-Client-Secret)",
+        "defaultValue": "",
+        "attributes": {
+          "placeholder": "Geheimer Schlüssel",
+          "type": "password"
+        }
+      }
+    ]
+  },
+  {
+    "type": "submit",
+    "defaultValue": "Save Settings"
+  }
+]
