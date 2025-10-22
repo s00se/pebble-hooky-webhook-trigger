@@ -1,12 +1,12 @@
 {
-  "name": "myfirstproject",
+  "name": "webhooktrigger",
   "author": "MakeAwesomeHappen",
   "version": "1.0.0",
   "keywords": ["pebble-app"],
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "myfirstproject",
+    "displayName": "Webhook Trigger",
     "uuid": "00000000-0000-0000-0000-000000000001",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -20,9 +20,9 @@
     "watchapp": {
       "watchface": false
     },
-    "messageKeys": [
-      "dummy"
-    ],
+    "messageKeys": {
+      "KEY_TRIGGER": 0
+    },
     "resources": {
       "media": []
     }
