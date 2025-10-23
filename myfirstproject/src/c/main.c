@@ -37,7 +37,7 @@ static void popup_timer_cb(void *data) {
   s_popup_timer = NULL;
 }
 
-static void show_transient_popup(const char *message_ms) {
+static void show_transient_popup(const char *message) {
   if (s_popup_window) {
     if (s_popup_timer) {
       app_timer_cancel(s_popup_timer);
@@ -63,7 +63,7 @@ static void show_transient_popup(const char *message_ms) {
   text_layer_set_text_color(s_popup_text, GColorWhite);
   text_layer_set_background_color(s_popup_text, GColorClear);
   text_layer_set_font(s_popup_text, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
-  text_layer_set_text(s_popup_text, message_ms);
+  text_layer_set_text(s_popup_text, message);
 
   layer_add_child(root, text_layer_get_layer(s_popup_text));
   window_stack_push(s_popup_window, true);
@@ -99,7 +99,7 @@ static void build_menu_layer(Window *window) {
   s_display_count = 0;
   for (int i = 0; i < MAX_WEBHOOKS; i++) {
     if (!s_enabled[i]) continue;
-    snprintf(s_subtitles[i], sizeof(s_subtitles[i]), "Webhook %d ausloesen", i + 1);
+    snprintf(s_subtitles[i], sizeof(s_subtitles[i]), "Trigger Webhook %d", i + 1);
     s_menu_items[s_display_count] = (SimpleMenuItem){
       .title = s_titles[i],
       .subtitle = s_subtitles[i],
@@ -112,8 +112,8 @@ static void build_menu_layer(Window *window) {
   if (s_display_count == 0) {
     static char no_title[32];
     static char no_sub[42];
-    snprintf(no_title, sizeof(no_title), "Keine Webhooks aktiviert");
-    snprintf(no_sub, sizeof(no_sub), "Bitte in den Einstellungen aktivieren");
+    snprintf(no_title, sizeof(no_title), "No webhooks enabled");
+    snprintf(no_sub, sizeof(no_sub), "Please enable them in settings");
     s_menu_items[0] = (SimpleMenuItem){
       .title = no_title,
       .subtitle = no_sub,
@@ -123,7 +123,7 @@ static void build_menu_layer(Window *window) {
   }
 
   s_menu_section = (SimpleMenuSection){
-    .title = "Aktionen",
+    .title = "Hooky Actions",
     .num_items = s_display_count,
     .items = s_menu_items
   };
@@ -176,16 +176,16 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
 
     switch (status) {
       case 200:
-        snprintf(buf, sizeof(buf), "Erfolgreich");
+        snprintf(buf, sizeof(buf), "Success");
         break;
       case 0:
-        snprintf(buf, sizeof(buf), "Fehler");
+        snprintf(buf, sizeof(buf), "Error");
         break;
       case -1:
         snprintf(buf, sizeof(buf), "Timeout");
         break;
       case -2:
-        snprintf(buf, sizeof(buf), "Webhook deaktiviert");
+        snprintf(buf, sizeof(buf), "Webhook disabled");
         break;
       default:
         snprintf(buf, sizeof(buf), "Status %ld", (long)status);
