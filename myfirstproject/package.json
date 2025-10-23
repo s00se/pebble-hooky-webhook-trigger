@@ -1,5 +1,5 @@
 {
-  "name": "webhooktrigger",
+  "name": "hookly",
   "author": "Achi",
   "version": "1.0.0",
   "keywords": [
@@ -10,7 +10,7 @@
     "pebble-clay": "^1.0.4"
   },
   "pebble": {
-    "displayName": "WH Trigger",
+    "displayName": "Hooky",
     "uuid": "00000000-0000-0000-0000-000000000001",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -31,7 +31,16 @@
       "clientsecret": 3
     },
     "resources": {
-      "media": []
+      "media": [
+        {
+          "type": "bitmap",
+          "name": "Icon",
+          "file": "images/icon.png",
+          "memoryFormat": "Smallest",
+          "spaceOptimization": "memory",
+          "menuIcon": true
+        }
+      ]
     },
     "capabilities": [
       "configurable"
