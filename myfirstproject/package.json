@@ -35,7 +35,7 @@
         {
           "type": "bitmap",
           "name": "Icon",
-          "file": "images/icon.png",
+          "file": "images/menu_icon.png",
           "memoryFormat": "Smallest",
           "spaceOptimization": "memory",
           "menuIcon": true
