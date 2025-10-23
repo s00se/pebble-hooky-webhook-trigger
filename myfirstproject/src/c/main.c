@@ -112,8 +112,8 @@ static void build_menu_layer(Window *window) {
   if (s_display_count == 0) {
     static char no_title[32];
     static char no_sub[42];
-    snprintf(no_title, sizeof(no_title), "No webhooks enabled");
-    snprintf(no_sub, sizeof(no_sub), "Please enable them in settings");
+    snprintf(no_title, sizeof(no_title), "No webhooks");
+    snprintf(no_sub, sizeof(no_sub), "Please create one");
     s_menu_items[0] = (SimpleMenuItem){
       .title = no_title,
       .subtitle = no_sub,

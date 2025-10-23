@@ -11,13 +11,12 @@
   },
   "pebble": {
     "displayName": "Hooky",
-    "uuid": "00000000-0000-0000-0000-000000000001",
+    "uuid": "b1372e1f-ce87-4085-bad7-991aa8d85ffb",
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
       "aplite",
       "basalt",
-      "chalk",
       "diorite",
       "emery"
     ],
