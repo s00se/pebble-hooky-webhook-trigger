@@ -1,4 +1,4 @@
-# ⌚ Hooky – Pebble Webhook Trigger App
+# Hooky – Pebble Webhook Trigger App
 
 Hooky is a modern Pebble app built using the **Pebble SDK 2025**, designed to trigger custom **HTTP webhooks** directly from your Pebble smartwatch — via your connected smartphone’s internet connection.  
 It’s the perfect lightweight automation companion for webhooks, IFTTT, Home Assistant, or any REST API you want to trigger with a single tap.
