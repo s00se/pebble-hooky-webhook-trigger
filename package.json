@@ -1,51 +1,53 @@
 {
-  "name": "hooky",
-  "author": "Achi",
-  "version": "1.0.0",
-  "keywords": [
-    "pebble-app"
-  ],
-  "private": true,
-  "dependencies": {
-    "pebble-clay": "^1.0.4"
-  },
-  "pebble": {
-    "displayName": "Hooky",
-    "uuid": "b1372e1f-ce87-4085-bad7-991aa8d85ffb",
-    "sdkVersion": "3",
-    "enableMultiJS": true,
-    "targetPlatforms": [
-      "aplite",
-      "basalt",
-      "diorite",
-      "emery"
+    "author": "Achi",
+    "dependencies": {
+        "@rebble/clay": "^1.0.8"
+    },
+    "keywords": [
+        "pebble-app"
     ],
-    "watchapp": {
-      "watchface": false
-    },
-    "messageKeys": {
-      "KEY_TRIGGER": 0,
-      "webhook": 1,
-      "clientid": 2,
-      "clientsecret": 3
-    },
-    "resources": {
-      "media": [
-        {
-          "type": "bitmap",
-          "name": "Icon",
-          "file": "images/menu_icon.png",
-          "memoryFormat": "Smallest",
-          "spaceOptimization": "memory",
-          "menuIcon": true
+    "name": "hooky",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "Hooky",
+        "enableMultiJS": true,
+        "messageKeys": {
+            "KEY_AUTO_CLOSE": 30,
+            "KEY_TRIGGER": 0,
+            "clientid": 2,
+            "clientsecret": 3,
+            "webhook": 1
+        },
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/menu_icon.png",
+                    "memoryFormat": "Smallest",
+                    "menuIcon": true,
+                    "name": "Icon",
+                    "spaceOptimization": "memory",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt",
+            "chalk",
+            "diorite",
+            "emery",
+            "gabbro",
+            "flint"
+        ],
+        "uuid": "b1372e1f-ce87-4085-bad7-991aa8d85ffb",
+        "watchapp": {
+            "watchface": false
         }
-      ]
     },
-    "capabilities": [
-      "configurable"
-    ],
-    "configurable": {
-      "clay": true
-    }
-  }
+    "version": "2.0.0"
 }

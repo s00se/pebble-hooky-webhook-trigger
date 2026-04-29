@@ -10,7 +10,7 @@
       {
         "type": "toggle",
         "messageKey": "enabled1",
-        "label": "Aktivieren",
+        "label": "Activate",
         "defaultValue": false
       },
       {
@@ -71,7 +71,7 @@
       {
         "type": "toggle",
         "messageKey": "enabled2",
-        "label": "Aktivieren",
+        "label": "Activate",
         "defaultValue": false
       },
       {
@@ -132,7 +132,7 @@
       {
         "type": "toggle",
         "messageKey": "enabled3",
-        "label": "Aktivieren",
+        "label": "Activate",
         "defaultValue": false
       },
       {
@@ -193,7 +193,7 @@
       {
         "type": "toggle",
         "messageKey": "enabled4",
-        "label": "Aktivieren",
+        "label": "Activate",
         "defaultValue": false
       },
       {
@@ -254,7 +254,7 @@
       {
         "type": "toggle",
         "messageKey": "enabled5",
-        "label": "Aktivieren",
+        "label": "Activate",
         "defaultValue": false
       },
       {
@@ -307,6 +307,22 @@
         ]
       }
     ]
+  },
+  
+  {
+  "type": "section",
+  "items": [
+    {
+      "type": "heading",
+      "defaultValue": "App Optionen"
+    },
+    {
+      "type": "toggle",
+      "messageKey": "KEY_AUTO_CLOSE",
+      "label": "Auto-Close after 5s",
+      "defaultValue": false
+    }
+  ]
   },
 
   {
