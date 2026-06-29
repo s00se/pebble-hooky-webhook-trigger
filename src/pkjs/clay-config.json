@@ -3,7 +3,6 @@
     "type": "heading",
     "defaultValue": "Hooky Settings"
   },
-
   {
     "type": "section",
     "items": [
@@ -64,7 +63,6 @@
       }
     ]
   },
-
   {
     "type": "section",
     "items": [
@@ -125,7 +123,6 @@
       }
     ]
   },
-
   {
     "type": "section",
     "items": [
@@ -186,7 +183,6 @@
       }
     ]
   },
-
   {
     "type": "section",
     "items": [
@@ -247,7 +243,6 @@
       }
     ]
   },
-
   {
     "type": "section",
     "items": [
@@ -308,23 +303,27 @@
       }
     ]
   },
-  
   {
-  "type": "section",
-  "items": [
-    {
-      "type": "heading",
-      "defaultValue": "App Optionen"
-    },
-    {
-      "type": "toggle",
-      "messageKey": "KEY_AUTO_CLOSE",
-      "label": "Auto-Close after 5s",
-      "defaultValue": false
-    }
-  ]
+    "type": "section",
+    "items": [
+      {
+        "type": "heading",
+        "defaultValue": "App Optionen"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "KEY_AUTO_CLOSE",
+        "label": "Auto-Close after 5s",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
+        "messageKey": "KEY_SOUND_FEEDBACK",
+        "label": "Play Sound on Success/Error",
+        "defaultValue": false
+      }
+    ]
   },
-
   {
     "type": "submit",
     "defaultValue": "Save Settings"

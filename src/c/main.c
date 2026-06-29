@@ -4,6 +4,7 @@
 #define KEY_UPDATE 1
 #define KEY_STATUS 2
 #define KEY_AUTO_CLOSE 30
+#define KEY_SOUND_FEEDBACK 40
 
 #define KEY_NAME_BASE 10
 #define KEY_ENABLED_BASE 20
@@ -18,6 +19,7 @@ static Layer *s_header_layer;
 static char s_titles[MAX_WEBHOOKS][32];
 static bool s_enabled[MAX_WEBHOOKS];
 static bool s_auto_close_enabled = false; 
+static bool s_sound_feedback_enabled = false;
 
 // Display data structure (pre-calculated for rendering)
 static char s_display_titles[MAX_WEBHOOKS][32];
@@ -179,12 +181,33 @@ static int32_t tuple_to_int32(const Tuple *t) {
   }
 }
 
+static const SpeakerNote __attribute__((unused)) s_arpeggio[] = {
+  { .midi_note = 60, .waveform = SpeakerWaveformSine,     .duration_ms = 200 }, // C4
+  { .midi_note = 64, .waveform = SpeakerWaveformSine,     .duration_ms = 200 }, // E4
+  { .midi_note = 67, .waveform = SpeakerWaveformSine,     .duration_ms = 200 }, // G4
+  { .midi_note = 72, .waveform = SpeakerWaveformTriangle, .duration_ms = 400 }, // C5
+};
+
+static void play_rejected_part2_cb(void *data) {
+  (void)speaker_play_tone(450, 400, 80, SpeakerWaveformSquare);
+}
+
+static void play_rejected_sound() {
+  (void)speaker_play_tone(600, 150, 80, SpeakerWaveformSquare);
+  app_timer_register(170, play_rejected_part2_cb, NULL);
+}
+
 static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   Tuple *t_autoclose = dict_find(iter, KEY_AUTO_CLOSE);
   if (t_autoclose) {
     s_auto_close_enabled = tuple_to_int32(t_autoclose) > 0;
-    
     APP_LOG(APP_LOG_LEVEL_INFO, "Config-Update: Auto-Close is now %s", s_auto_close_enabled ? "ON" : "OFF");
+  }
+
+  Tuple *t_sound = dict_find(iter, KEY_SOUND_FEEDBACK);
+  if (t_sound) {
+    s_sound_feedback_enabled = tuple_to_int32(t_sound) > 0;
+    APP_LOG(APP_LOG_LEVEL_INFO, "Config-Update: Sound Feedback is now %s", s_sound_feedback_enabled ? "ON" : "OFF");
   }
 
   Tuple *t_update = dict_find(iter, KEY_UPDATE);
@@ -210,37 +233,50 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
     static char buf[64];
     GColor popup_color = GColorBlack;
 
-    // Loggen, ob der Status ankommt und was die Variable gerade sagt
-    APP_LOG(APP_LOG_LEVEL_INFO, "Webhook Status %ld received. Auto-Close Variable is: %d", (long)status, s_auto_close_enabled);
+    APP_LOG(APP_LOG_LEVEL_INFO, "Webhook Status %ld received.", (long)status);
 
     switch (status) {
       case 200:
         snprintf(buf, sizeof(buf), "Success");
         popup_color = GColorIslamicGreen;
         
-        // 2. Timer starten, falls Auto-Close aktiv ist!
+        if (s_sound_feedback_enabled) {
+          // Play the predefined C-major arpeggio sequence
+          (void)speaker_play_notes(s_arpeggio, ARRAY_LENGTH(s_arpeggio), 80); 
+        }
+
         if (s_auto_close_enabled) {
           APP_LOG(APP_LOG_LEVEL_INFO, "Start 5s Auto-Close Timer...");
           app_timer_register(5000, auto_close_timer_cb, NULL);
-        } else {
-          APP_LOG(APP_LOG_LEVEL_INFO, "Timer not started, because Auto-Close is off.");
         }
         break;
       case 0:
         snprintf(buf, sizeof(buf), "Error");
         popup_color = GColorRed;
+        if (s_sound_feedback_enabled) {
+          play_rejected_sound(); 
+        }
         break;
       case -1:
         snprintf(buf, sizeof(buf), "Timeout");
         popup_color = GColorOrange;
+        if (s_sound_feedback_enabled) {
+          play_rejected_sound(); 
+        }
         break;
       case -2:
         snprintf(buf, sizeof(buf), "Disabled");
         popup_color = GColorDarkGray; 
+        if (s_sound_feedback_enabled) {
+          play_rejected_sound(); 
+        }
         break;
       default:
         snprintf(buf, sizeof(buf), "Status %ld", (long)status);
         popup_color = GColorRed;
+        if (s_sound_feedback_enabled) {
+          play_rejected_sound(); 
+        }
         break;
     }
 

@@ -57,7 +57,8 @@ var KEY_UPDATE = 1;
 var KEY_STATUS = 2; // new: send status to watch
 var KEY_NAME_BASE = 10;
 var KEY_ENABLED_BASE = 20;
-var KEY_AUTO_CLOSE = 30; // <-- HIER HINZUGEFÜGT (Passend zu #define KEY_AUTO_CLOSE 30)
+var KEY_AUTO_CLOSE = 30;
+var KEY_SOUND_FEEDBACK = 40; // <-- NEU FÜR SOUND FEEDBACK
 
 // --- Utility
 function asString(v) {
@@ -81,10 +82,11 @@ function buildDictForEnabled(settingsObjFlat) {
   // Update flag for the watch
   dict[KEY_UPDATE] = 1;
 
-  // HIER FEHLTE DIE ÜBERGABE AN DIE UHR!
-  // Wir lesen den Toggle-Wert aus den Einstellungen und speichern ihn als 1 (true) oder 0 (false)
   var autoClose = asBool(cfg['KEY_AUTO_CLOSE']) ? 1 : 0;
   dict[KEY_AUTO_CLOSE] = autoClose; 
+
+  var soundFeedback = asBool(cfg['KEY_SOUND_FEEDBACK']) ? 1 : 0;
+  dict[KEY_SOUND_FEEDBACK] = soundFeedback;
 
   for (var i = 1; i <= 5; i++) {
     var nameKey = 'name' + i;
